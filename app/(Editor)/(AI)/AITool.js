@@ -3,8 +3,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import CustomBubbleMenu from './CustomBubbleMenu'; 
 
 const AITool = ({ editor }) => {
-    if (!editor) return null;
-
+    // 1. ALL HOOKS MUST BE DECLARED FIRST (Unconditionally)
     const [isOpen, setIsOpen] = useState(false);
     const [prompt, setPrompt] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -22,6 +21,14 @@ const AITool = ({ editor }) => {
             });
         }
     }, [isOpen]);
+
+    // Define callback first
+    const shouldShow = useCallback(() => isOpen, [isOpen]);
+
+    // 2. NOW WE CAN CHECK FOR EDITOR EXISTENCE
+    // However, we need to make sure the functions below don't crash if editor is null,
+    // although this component typically won't render buttons if it returns null here.
+    if (!editor) return null;
 
     const handleOpenAI = () => {
         const { from, to, empty } = editor.state.selection;
@@ -98,8 +105,6 @@ const AITool = ({ editor }) => {
         }
     };
 
-    const shouldShow = useCallback(() => isOpen, [isOpen]);
-
     return (
         <>
             {/* Toolbar Button */}
@@ -148,7 +153,7 @@ const AITool = ({ editor }) => {
                                     Edit Selection with AI
                                 </label>
                                 
-                                {/* Input Field - Styled like the reference */}
+                                {/* Input Field */}
                                 <input
                                     ref={inputRef}
                                     type="text"
@@ -156,7 +161,7 @@ const AITool = ({ editor }) => {
                                     placeholder="Make the text shorter, fix grammar, etc..."
                                     value={prompt}
                                     onChange={(e) => setPrompt(e.target.value)}
-                                    onKeyDown={(e) => e.stopPropagation()} // Prevent editor from capturing keys
+                                    onKeyDown={(e) => e.stopPropagation()} 
                                 />
 
                                 {/* Footer Buttons */}
@@ -194,8 +199,9 @@ const AITool = ({ editor }) => {
                                     </span>
                                 </div>
 
+                                {/* FIX: Replaced quotes with HTML entities */}
                                 <div className="text-xs text-gray-500 bg-gray-50 p-2 rounded border border-gray-100 max-h-32 overflow-y-auto italic">
-                                    "{accumulatedResponse}"
+                                    &quot;{accumulatedResponse}&quot;
                                 </div>
 
                                 <div className="flex justify-end gap-2 mt-2">

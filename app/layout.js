@@ -1,6 +1,7 @@
 // app/layout.js
 
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from 'next/script';
 import "./globals.css";
 
 const geistSans = Geist({
@@ -22,12 +23,13 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <head>
-        {/* We are ONLY loading CSS here. All JavaScript has been removed. */}
-        {/* <link href="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.css" rel="stylesheet" />
-        <link href="https://cdn.jsdelivr.net/npm/flowbite-typography@1.0.3/dist/flowbite-typography.min.css" rel="stylesheet" /> */}
+
         <link href="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.css" rel="stylesheet" />
-<script src="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.js"></script>
-<link href="https://cdn.jsdelivr.net/npm/flowbite-typography@1.0.3/dist/flowbite-typography.min.css" rel="stylesheet" />
+        <Script 
+          src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.js" 
+          strategy="lazyOnload" 
+        />
+      <link href="https://cdn.jsdelivr.net/npm/flowbite-typography@1.0.3/dist/flowbite-typography.min.css" rel="stylesheet" />
 
 
       </head>

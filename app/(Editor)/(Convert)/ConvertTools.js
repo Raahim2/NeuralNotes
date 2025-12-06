@@ -1,18 +1,18 @@
+// app/(Editor)/(Convert)/ConvertTools.js
+"use client"; // Ensure this is a client component
 import React, { useState, useRef } from 'react';
 import mammoth from 'mammoth';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
 const ConvertTools = ({ editor }) => {
+    // 1. ALWAYS CALL HOOKS FIRST (Unconditionally)
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const fileInputRef = useRef(null); // Ref to access the file input
+    const fileInputRef = useRef(null);
 
-    if (!editor) {
-        return null;
-    }
-
-    // --- IMPORT LOGIC ---
+    // 2. FUNCTIONS
     const handleFileChange = (event) => {
+        if (!editor) return; // Check editor existence inside function
         const file = event.target.files[0];
         if (!file) return;
 
@@ -21,7 +21,6 @@ const ConvertTools = ({ editor }) => {
             const arrayBuffer = loadEvent.target.result;
             mammoth.convertToHtml({ arrayBuffer: arrayBuffer })
                 .then(result => {
-                    // Set the converted HTML into the Tiptap editor
                     editor.commands.setContent(result.value, true);
                 })
                 .catch(error => {
@@ -33,11 +32,11 @@ const ConvertTools = ({ editor }) => {
     };
 
     const triggerFileInput = () => {
-        fileInputRef.current.click();
+        fileInputRef.current?.click();
     };
 
-    // --- EXPORT LOGIC ---
     const exportAs = (format) => {
+        if (!editor) return;
         let content, blobType, fileName;
 
         switch (format) {
@@ -57,7 +56,7 @@ const ConvertTools = ({ editor }) => {
                     });
                 }
                 setIsModalOpen(false);
-                return; // Return early as pdf creation is async
+                return;
 
             case 'doc':
                 content = editor.getHTML();
@@ -84,7 +83,7 @@ const ConvertTools = ({ editor }) => {
                 break;
             
             case 'json':
-                content = JSON.stringify(editor.getJSON(), null, 2); // Pretty print JSON
+                content = JSON.stringify(editor.getJSON(), null, 2);
                 blobType = 'application/json';
                 fileName = 'document.json';
                 break;
@@ -102,8 +101,13 @@ const ConvertTools = ({ editor }) => {
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
-        setIsModalOpen(false); // Close modal after export
+        setIsModalOpen(false);
     };
+
+    // 3. CONDITIONAL RETURN LAST
+    if (!editor) {
+        return null;
+    }
 
     return (
         <>
@@ -135,9 +139,9 @@ const ConvertTools = ({ editor }) => {
                     <span className="sr-only">Export</span>
                 </button>
 
-                    <div className="px-1">
-                            <span className="block w-px h-4 bg-gray-300 dark:bg-gray-600"></span>
-                        </div>
+                <div className="px-1">
+                    <span className="block w-px h-4 bg-gray-300 dark:bg-gray-600"></span>
+                </div>
             </div>
 
             {/* Export Modal */}
@@ -153,7 +157,10 @@ const ConvertTools = ({ editor }) => {
                                 </button>
                             </div>
                             <div className="p-6 space-y-4">
-                                <p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">Choose the format you'd like to export the document as.</p>
+                                {/* FIXED: Replaced ' with &apos; */}
+                                <p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
+                                    Choose the format you&apos;d like to export the document as.
+                                </p>
                                 <div className="grid grid-cols-2 gap-4">
                                     <button onClick={() => exportAs('pdf')} className="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Export as PDF</button>
                                     <button onClick={() => exportAs('doc')} className="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Export as DOC</button>
