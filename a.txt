@@ -1,0 +1,338 @@
+========== 4 GRAPH TRAVERSAL ===========
+
+import java.util.*;
+
+class Main {
+    public static void main(String[] args) {
+        Map<Integer , List<Integer>> hm = new HashMap<>();
+        
+        hm.put(1 , Arrays.asList(2 , 3));
+        hm.put(2 , Arrays.asList(4));
+        hm.put(3 , new ArrayList<>());
+        hm.put(4 , new ArrayList<>());
+        
+        Set<Integer> b = new HashSet<>();
+        
+        iterative_deepning(hm , 1  , 4);
+        
+        
+    }
+    public static void bfs(Map<Integer , List<Integer>> gr , int start){
+        
+        Queue<Integer> q = new LinkedList<>();
+        Set<Integer> vis = new HashSet<>();
+        
+        q.add(start);
+        vis.add(start);
+        
+        while(!q.isEmpty()){
+            int node = q.poll();
+            System.out.print(node + " ") ; 
+            
+            for(int next : gr.get(node)){
+                if(!vis.contains(next)){
+                    vis.add(next);
+                    q.add(next);
+                }
+            }
+        }
+    }
+    
+    public static void dfs(Map<Integer , List<Integer>> gr , int node , Set<Integer> vis){
+        
+        vis.add(node);
+        System.out.print(node + " ");
+        
+        
+        for(int next : gr.get(node)){
+            if(!vis.contains(next)){
+                dfs(gr , next  , vis);
+            }
+        }
+    }
+    
+    public static void dls(Map<Integer , List<Integer>> gr , int node , Set<Integer> vis , int depth , int limit){
+        if(depth > limit) {
+            return ;
+        }
+        
+        vis.add(node);
+        System.out.print(node + " ");
+        
+        
+        for(int next : gr.get(node)){
+            if(!vis.contains(next)){
+                dls(gr , next  , vis , depth+1  , limit);
+            }
+        }
+        
+        
+    }
+    
+    public static void iterative_deepning(Map<Integer , List<Integer>> gr , int node , int ml){
+        
+    for(int i = 0 ; i <= ml ; i++) {
+        System.out.print("Iter " + i + " : ");
+        Set<Integer> vis = new HashSet<>();   
+        dls(gr , node , vis , 0 , i);
+        System.out.println();
+    }
+}
+
+}
+
+
+
+============= a str ==============
+
+  import java.util.*;
+
+class AStar {
+    static class Node {
+        int x,y,g,h;
+        Node p;
+        Node(int x,int y,int g,int h,Node p){
+            this.x=x;this.y=y;this.g=g;this.h=h;this.p=p;
+        }
+    }
+
+    static int h(int x1,int y1,int x2,int y2){
+        return Math.abs(x1-x2)+Math.abs(y1-y2);
+    }
+
+    public static void main(String[] args){
+        int[][] grid={
+                {0,0,0,0},
+                {1,1,0,1},
+                {0,0,0,0},
+                {0,1,1,0},
+                {0,0,0,0}
+        };
+
+        int sx=0,sy=0,tx=4,ty=3;
+
+        PriorityQueue<Node> pq=new PriorityQueue<>(Comparator.comparingInt(a->a.g+a.h));
+        boolean[][] vis=new boolean[grid.length][grid[0].length];
+        pq.add(new Node(sx,sy,0,h(sx,sy,tx,ty),null));
+        Node end=null;
+
+        int[] dx={1,-1,0,0};
+        int[] dy={0,0,1,-1};
+
+        while(!pq.isEmpty()){
+            Node n=pq.poll();
+            if(vis[n.x][n.y]) continue;
+            vis[n.x][n.y]=true;
+            if(n.x==tx&&n.y==ty){ end=n; break; }
+            for(int i=0;i<4;i++){
+                int nx=n.x+dx[i],ny=n.y+dy[i];
+                if(nx>=0&&ny>=0&&nx<grid.length&&ny<grid[0].length&&grid[nx][ny]==0&&!vis[nx][ny])
+                    pq.add(new Node(nx,ny,n.g+1,h(nx,ny,tx,ty),n));
+            }
+        }
+
+        List<int[]> path=new ArrayList<>();
+        while(end!=null){
+            path.add(new int[]{end.x,end.y});
+            end=end.p;
+        }
+        Collections.reverse(path);
+        for(int[] p:path) System.out.println(p[0]+" "+p[1]);
+    }
+}
+
+
+=========== Gen algo ==========
+
+  import java.util.*;
+
+public class SimpleGA {
+    static final String TARGET = "HELLO";
+    static final String GENES = "ABCDEFGHIJKLMNOPQRSTUVWXYZ ";
+    static final int POP = 50;
+    static final double MUT = 0.1;
+    static final Random R = new Random();
+
+    static String randomString() {
+        char[] c = new char[TARGET.length()];
+        for (int i = 0; i < c.length; i++)
+            c[i] = GENES.charAt(R.nextInt(GENES.length()));
+        return new String(c);
+    }
+
+    static int fitness(String s) {
+        int f = 0;
+        for (int i = 0; i < s.length(); i++)
+            if (s.charAt(i) == TARGET.charAt(i)) f++;
+        return f;
+    }
+
+    static String mate(String a, String b) {
+        char[] c = new char[TARGET.length()];
+        for (int i = 0; i < c.length; i++) {
+            c[i] = R.nextBoolean() ? a.charAt(i) : b.charAt(i);
+            if (R.nextDouble() < MUT)
+                c[i] = GENES.charAt(R.nextInt(GENES.length()));
+        }
+        return new String(c);
+    }
+
+    public static void main(String[] args) {
+        List<String> pop = new ArrayList<>();
+        for (int i = 0; i < POP; i++) pop.add(randomString());
+        int gen = 0;
+
+        while (true) {
+            pop.sort((x, y) -> fitness(y) - fitness(x));
+            String best = pop.get(0);
+            System.out.println("Gen " + gen + ": " + best);
+            if (fitness(best) == TARGET.length()) break;
+
+            List<String> next = new ArrayList<>();
+            for (int i = 0; i < POP; i++)
+                next.add(mate(
+                        pop.get(R.nextInt(POP / 2)),
+                        pop.get(R.nextInt(POP / 2))
+                ));
+            pop = next;
+            gen++;
+        }
+    }
+}
+
+
+============== WUMPUS ==============
+
+
+  import random
+
+SIZE = 4
+
+grid = [["." for _ in range(SIZE)] for _ in range(SIZE)]
+wumpus = (random.randint(0, SIZE-1), random.randint(0, SIZE-1))
+pit = (random.randint(0, SIZE-1), random.randint(0, SIZE-1))
+gold = (random.randint(0, SIZE-1), random.randint(0, SIZE-1))
+
+agent = (0, 0)
+
+grid[wumpus[0]][wumpus[1]] = "W"
+grid[pit[0]][pit[1]] = "P"
+grid[gold[0]][gold[1]] = "G"
+
+def move(a):
+    x, y = a
+    moves = []
+    if x > 0: moves.append((x-1,y))
+    if x < SIZE-1: moves.append((x+1,y))
+    if y > 0: moves.append((x,y-1))
+    if y < SIZE-1: moves.append((x,y+1))
+    return random.choice(moves)
+
+while True:
+    print("Agent at:", agent)
+
+    if agent == wumpus:
+        print("Eaten by Wumpus")
+        break
+    if agent == pit:
+        print("Fell into Pit")
+        break
+    if agent == gold:
+        print("Found Gold!")
+        break
+
+    agent = move(agent)
+
+
+
+  ====== mycin =======
+
+  rules = [
+    {"if": {"fever": True, "cough": True}, "then": "respiratory infection"},
+    {"if": {"sore_throat": True}, "then": "throat infection"},
+    {"if": {"rash": True}, "then": "skin infection"}
+]
+
+facts = {}
+
+def ask(symptom):
+    ans = input(f"Does the patient have {symptom}? (y/n): ").lower()
+    return ans == "y"
+
+symptoms = ["fever", "cough", "sore_throat", "rash"]
+
+for s in symptoms:
+    facts[s] = ask(s)
+
+for r in rules:
+    match = True
+    for k, v in r["if"].items():
+        if facts.get(k) != v:
+            match = False
+            break
+    if match:
+        print("Diagnosis:", r["then"])
+        break
+else:
+    print("No diagnosis")
+
+
+
+
+
+
+
+
+
+  ====minni maxi ====
+
+  def minimax(board, depth, alpha, beta, maximizing):
+    scores = {"X": 1, "O": -1, "tie": 0}
+
+    result = check_winner(board)
+    if result is not None:
+        return scores[result]
+
+    if maximizing:
+        best = -999
+        for move in moves(board):
+            board[move] = "X"
+            val = minimax(board, depth + 1, alpha, beta, False)
+            board[move] = None
+            best = max(best, val)
+            alpha = max(alpha, val)
+            if beta <= alpha:
+                break
+        return best
+    else:
+        best = 999
+        for move in moves(board):
+            board[move] = "O"
+            val = minimax(board, depth + 1, alpha, beta, True)
+            board[move] = None
+            best = min(best, val)
+            beta = min(beta, val)
+            if beta <= alpha:
+                break
+        return best
+
+def moves(board):
+    return [i for i in range(9) if board[i] is None]
+
+def check_winner(b):
+    wins = [(0,1,2),(3,4,5),(6,7,8),
+            (0,3,6),(1,4,7),(2,5,8),
+            (0,1,2),(2,4,6)]
+    for a,b1,c in wins:
+        if b[a] and b[a] == b[b1] == b[c]:
+            return b[a]
+    if None not in b:
+        return "tie"
+    return None
+
+board = [None]*9
+print(minimax(board, 0, -999, 999, True))
+
+
+
+
